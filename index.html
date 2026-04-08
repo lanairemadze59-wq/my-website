@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<title>Anonymous Mail Sender</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(45deg, #ff6eb4, #ff3daa, #d94dff, #ff6eb4);
+    background-size: 400% 400%;
+    animation: gradientBG 8s ease infinite;
+    overflow: hidden;
+  }
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    border-radius: 40px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    border: 2px solid rgba(255,255,255,0.4);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    z-index: 10;
+  }
+  h2 { color: white; font-weight: 900; margin-bottom: 20px; }
+  
+  .input-group { text-align: left; margin-bottom: 20px; }
+  label { display: block; color: white; font-weight: 800; margin-left: 10px; margin-bottom: 8px; }
+  
+  /* ეს არის ველი, სადაც ეწერება ანონიმურად */
+  .anon-display {
+    width: 100%;
+    padding: 15px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.4);
+    color: white;
+    font-weight: 700;
+    text-align: center;
+    border: 1px dashed white;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 15px;
+    border-radius: 20px;
+    border: none;
+    background: rgba(255,255,255,0.9);
+    outline: none;
+    font-family: 'Nunito';
+    font-weight: 600;
+  }
+  textarea { height: 120px; resize: none; }
+  
+  .send-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 25px;
+    border: none;
+    background: white;
+    color: #ff3daa;
+    font-weight: 900;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+  .send-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(0,0,0,0.2); }
+
+  .music-btn {
+    background: none;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.5);
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .floaty { position: fixed; top: -50px; animation: fall linear infinite; pointer-events: none; opacity: 0.7; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="bg-elements"></div>
+
+<div class="card">
+  <h2>♥ Mail Sender</h2>
+  
+  <form action="https://formspree.io/f/შენი_აიდი" method="POST">
+    
+    <div class="input-group">
+        <label>მიმღები</label>
+        <div class="anon-display">ანონიმურად</div>
+        <input type="hidden" name="to" value="recipient@example.com">
+    </div>
+
+    <div class="input-group">
+        <label>სათაური</label>
+        <input type="text" name="subject" placeholder="წერილის სათაური">
+    </div>
+
+    <div class="input-group">
+        <label>შენი წერილი</label>
+        <textarea name="message" placeholder="დაწერე რამე თბილი..."></textarea>
+    </div>
+
+    <button type="submit" class="send-btn">გაგზავნა ♥</button>
+    <button type="button" id="musicBtn" class="music-btn">♫ მუსიკის ჩართვა</button>
+  </form>
+</div>
+
+<script>
+  // ფონის გულები
+  const bg = document.getElementById('bg-elements');
+  const symbols = ['♥','❤','🌸','✨'];
+  for(let i=0; i<15; i++){
+    let el = document.createElement('div');
+    el.className = 'floaty';
+    el.textContent = symbols[i%4];
+    el.style.left = Math.random()*100+'vw';
+    el.style.fontSize = Math.random()*20+15+'px';
+    el.style.color = 'white';
+    el.style.animationDuration = Math.random()*5+7s;
+    el.style.animationDelay = Math.random()*5+'s';
+    bg.appendChild(el);
+  }
+
+  // მუსიკა
+  let audioCtx;
+  const notes = [261.63, 329.63, 392.00, 523.25];
+
+  async function startMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    
+    let now = audioCtx.currentTime;
+    for (let i = 0; i < 40; i++) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(notes[Math.floor(Math.random()*notes.length)], now + i*0.8);
+      gain.gain.setValueAtTime(0, now + i*0.8);
+      gain.gain.linearRampToValueAtTime(0.1, now + i*0.8 + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.8 + 2);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + i*0.8);
+      osc.stop(now + i*0.8 + 2);
+    }
+  }
+
+  document.getElementById('musicBtn').addEventListener('click', function() {
+    startMusic();
+    this.innerText = "♫ მუსიკა ჩართულია";
+  });
+</script>
+
+</body>
+</html>
